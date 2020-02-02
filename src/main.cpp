@@ -1,6 +1,8 @@
+#include <typeDefinitions>
 #include <iostream>
 
 auto main() -> int {
-    std::cout << "hello, world!\n"; 
+    u8 num = 10;
+    std::cout << "number: " << num << '\n';
     return 0;
 }
