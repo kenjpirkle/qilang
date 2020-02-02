@@ -6,6 +6,12 @@ debug:
 release:
 	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) src/main.cpp
 
+rund:
+	./$(DEBUG_TARGET)
+
+runr:
+	./S(RELEASE_TARGET)
+
 clean:
 	$(RM) $(DEBUG_TARGET)
 	$(RM) $(RELEASE_TARGET)
