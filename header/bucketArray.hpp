@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bitset>
+#include <vector>
 
 template <typename T, int N>
 struct bucketArray {
@@ -11,12 +12,15 @@ public:
     }
     auto emplace(T&& element) -> T& {
         if (count_ == maxSize()) {
-            // have to allocate a new bucket
+            // all buckets fully occupied, have to allocate a new one
             allocNewBucket();
-            last_[0] = element;
+            last_->elements[0] = element;
+            last_->occupancies[0] = 1;
+            ++count;
+            return last_->elements[0];
+        } else {
+            // find place to insert new element
         }
-
-        ++count_;
     }
 private:
     struct bucket {
@@ -29,7 +33,7 @@ private:
         }
     };
 
-    auto maxSize() -> int {
+    inline auto maxSize() -> int {
         return N * bucketCount_;
     }
 
