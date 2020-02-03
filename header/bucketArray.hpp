@@ -16,7 +16,7 @@ public:
             allocNewBucket();
             last_->elements[0] = element;
             last_->occupancies[0] = 1;
-            ++count;
+            ++count_;
             return last_->elements[0];
         } else {
             // find place to insert new element
