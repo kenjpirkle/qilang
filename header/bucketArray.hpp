@@ -48,16 +48,6 @@ private:
         }
     };
 
-    inline auto findSlot() -> T& {
-        for (auto& bucket : buckets_) {
-            if (bucket->occupancies.all() == false) {
-                for (auto& slot : bucket) {
-                    if (slot == 0) return bucket->elements[slot];
-                }
-            }
-        }
-    }
-
     inline auto maxSize() const -> size_t {
         return N * buckets_.size();
     }
