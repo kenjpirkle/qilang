@@ -29,7 +29,7 @@ public:
 
             int slot = [&]() -> int {
                 int s = 0;
-                while (bucket->occupancies[s] != 0 || s < N) { ++s; }
+                while (bucket->occupancies[s] != 0) { ++s; }
                 return s;
             }();
 
@@ -47,7 +47,7 @@ private:
             return sizeof(T) * N;
         }
     };
-
+    
     inline auto maxSize() const -> size_t {
         return N * buckets_.size();
     }
