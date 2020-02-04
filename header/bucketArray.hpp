@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <bitset>
 #include <vector>
@@ -13,38 +14,55 @@ public:
     auto emplace(T&& element) -> T& {
         if (count_ == maxSize()) {
             // all buckets fully occupied, have to allocate a new one
-            allocNewBucket();
-            last_->elements[0] = element;
-            last_->occupancies[0] = 1;
+            bucket& b = *buckets_.emplace_back(new bucket());
+            b.elements[0] = element;
+            b.occupancies.set(0);
             ++count_;
-            return last_->elements[0];
+            return b.elements[0];
         } else {
             // find place to insert new element
+            const auto bucket = *std::find_if(
+                buckets_.rbegin(),
+                buckets_.rend(),
+                [](const auto& buck) { return !buck->occupancies.all(); }
+            );
+
+            int slot = [&]() -> int {
+                int s = 0;
+                while (bucket->occupancies[s] != 0 || s < N) { ++s; }
+                return s;
+            }();
+
+            bucket->elements[slot] = element;
+            ++count_;
+            return bucket->elements[slot];
         }
     }
 private:
     struct bucket {
         std::bitset<N> occupancies;
         std::array<T, N> elements;
-        bucket* next;
 
-        constexpr auto maxSize() -> int {
+        constexpr auto maxSize() const -> int {
             return sizeof(T) * N;
         }
     };
 
-    inline auto maxSize() -> int {
-        return N * bucketCount_;
+    inline auto findSlot() -> T& {
+        for (auto& bucket : buckets_) {
+            if (bucket->occupancies.all() == false) {
+                for (auto& slot : bucket) {
+                    if (slot == 0) return bucket->elements[slot];
+                }
+            }
+        }
     }
 
-    inline auto allocNewBucket() -> void {
-        last_->next = new bucket();
-        last_ = last_->next;
-        ++bucketCount_;
+    inline auto maxSize() const -> size_t {
+        return N * buckets_.size();
     }
 
-    bucket* first_;
-    bucket* last_;
+    // TODO: implement union of bucket* & fully occupied bit
+    std::vector<bucket*> buckets_;
     size_t count_;
-    size_t bucketCount_;
 };
