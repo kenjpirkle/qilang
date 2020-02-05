@@ -21,7 +21,7 @@ CC = g++
 DEBUG_TARGET   = bin/debug/qi
 RELEASE_TARGET = bin/release/qi
 
-DEBUG_FLAGS = -ggdb3 -Wextra -pthread -std=c++2a
-RELEASE_FLAGS = -Wextra -pthread -std=c++2a -Wno-switch -Wno-maybe-uninitialized -march=native -Ofast
+DEBUG_FLAGS = -ggdb3 -Wall -Wno-pointer-arith -pthread -std=c++2a
+RELEASE_FLAGS = -Wall -Wno-pointer-arith -pthread -std=c++2a -Wno-switch -Wno-maybe-uninitialized -march=native -Ofast
 
-INCLUDES = -I./header/
+INCLUDES = -I./includes/
