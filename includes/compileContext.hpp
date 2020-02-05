@@ -2,6 +2,7 @@
 
 #include "typeDefinitions.hpp"
 #include "monoAllocator.hpp"
+#include <optional>
 #include <unordered_map>
 #include <mutex>
 #include <string_view>
@@ -15,6 +16,7 @@ struct compileContext {
 public:
     compileContext(const std::string_view);
     auto add(const std::string_view) -> void;
+    auto pop() -> std::optional<std::pair<std::string_view, std::string_view>>;
 
 private:
     std::mutex mutex_;
