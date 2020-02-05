@@ -10,7 +10,7 @@ rund:
 	./$(DEBUG_TARGET)
 
 runr:
-	./S(RELEASE_TARGET)
+	./$(RELEASE_TARGET)
 
 clean:
 	$(RM) $(DEBUG_TARGET)
