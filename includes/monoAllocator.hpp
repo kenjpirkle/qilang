@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#pragma pack(push, 1)
+
 template <typename T, int N>
 struct monoAllocator {
 public:
@@ -35,3 +37,5 @@ private:
     void* last_;
     std::vector<void*> slabs_;
 };
+
+#pragma pack(pop)
