@@ -19,11 +19,14 @@ public:
             allocateSlab();
         }
 
-        return *static_cast<T*>(curr_);
+        T* ptr = static_cast<T*>(curr_);
+        curr_ += sizeof(T);
+        *ptr = element;
+        return *ptr;
     }
 
 private:
-    constexpr int slabSize_ = sizeof(T) * N;
+    constexpr static int slabSize_ = sizeof(T) * N;
 
     auto allocateSlab() -> void {
         curr_ = std::malloc(slabSize_);
@@ -31,7 +34,7 @@ private:
         slabs_.emplace_back(curr_);
     }
 
-    T* curr_;
-    T* last_;
+    void* curr_;
+    void* last_;
     std::vector<void*> slabs_;
 };
