@@ -6,9 +6,6 @@
 template <typename T, int N>
 struct monoAllocator {
 public:
-    monoAllocator() {
-        allocateSlab();
-    }
     ~monoAllocator() {
         for (auto& s : slabs_) {
             std::free(s);
