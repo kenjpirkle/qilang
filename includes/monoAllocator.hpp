@@ -11,7 +11,7 @@ public:
             std::free(s);
         }
     }
-    auto emplace_back(T&& element) -> T& {
+    auto emplaceBack(T&& element) -> T* {
         if (curr_ == last_) {
             allocateSlab();
         }
@@ -19,7 +19,7 @@ public:
         T* ptr = static_cast<T*>(curr_);
         curr_ += sizeof(T);
         *ptr = element;
-        return *ptr;
+        return ptr;
     }
 
 private:
