@@ -1,19 +1,24 @@
 all: debug release
 
-debug:
-	$(CC) $(INCLUDES) $(DEBUG_FLAGS) -o $(DEBUG_TARGET) src/main.cpp
-
-release:
-	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) src/main.cpp
-
-rund:
+rund: debug
 	./$(DEBUG_TARGET)
 
-runr:
+runr: release
 	./$(RELEASE_TARGET)
 
-clean:
+debug: cleand
+	$(CC) $(INCLUDES) $(DEBUG_FLAGS) -o $(DEBUG_TARGET) src/main.cpp
+
+release: cleanr
+	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) src/main.cpp
+
+
+clean: cleand cleanr
+
+cleand:
 	$(RM) $(DEBUG_TARGET)
+
+cleanr:
 	$(RM) $(RELEASE_TARGET)
 
 CC = g++
