@@ -24,4 +24,10 @@ namespace stringUtils {
         }
         return h;
     }
+
+    constexpr static auto copy(const char* first, const char* last, char* to) -> void {
+        while (first < last) {
+            *to++ = *first++;
+        }
+    }
 }
