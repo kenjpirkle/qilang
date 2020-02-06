@@ -3,13 +3,11 @@
 #include "typeDefinitions.hpp"
 #include "word.hpp"
 #include "stringUtils.hpp"
-#include <cstring>
-#include <vector>
 #include <string_view>
 
 #pragma pack(push, 1)
 
-// fString acts as a union of a small buffer optimized string or a string_view
+// fString acts as a union of a small buffer optimized string and a string_view
 struct fString {
 public:
     fString(const char* start, const char* end, const std::size_t hash) :
@@ -40,7 +38,8 @@ public:
         }
     }
 
-    constexpr fString(const char* str) :
+    template<std::size_t N>
+    constexpr fString(const char (&str)[N]) :
         hash_(stringUtils::hash(str)),
         internalString_(),
         capacity_({
@@ -48,11 +47,11 @@ public:
             .remaining = static_cast<char>(23 - (stringUtils::size(str)))
         })
     {
-        std::memcpy(&internalString_[0], str, internalStringSize());
+        stringUtils::copy(&str[0], &str[N - 1], &internalString_[0]);
     }
 
-    inline auto size() const -> u64 {
-        return isSmall() ? internalStringSize() : stringView_.length;
+    constexpr auto size() const -> u64 {
+        return isSmall() ? internalStringSize() : stringView_.length();
     }
 
     inline auto operator ==(const fString& other) const -> bool {
@@ -74,6 +73,13 @@ public:
     inline auto operator !=(const fString& other) const -> bool {
         return !(*this == other);
     }
+
+    friend auto operator <<(std::ostream& strm, const fString& fs) -> std::ostream& {
+        return strm << 
+            (fs.isSmall() 
+                ? std::string_view(&fs.internalString_[0], fs.internalStringSize())
+                : fs.stringView_);
+    }
 private:
     const std::size_t hash_;
     union {
@@ -85,11 +91,11 @@ private:
         char remaining : 7;
     } capacity_;
 
-    inline auto internalStringSize() const -> u64 {
+    constexpr auto internalStringSize() const -> u64 {
         return 23 - capacity_.remaining;
     }
 
-    inline auto isSmall() const -> bool {
+    constexpr auto isSmall() const -> bool {
         return capacity_.isSmall;
     }
 };
