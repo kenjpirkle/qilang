@@ -1,6 +1,8 @@
 #pragma once
 
 #include "typeDefinitions.hpp"
+#include "word.hpp"
+#include "stringUtils.hpp"
 #include <cstring>
 #include <vector>
 #include <string_view>
@@ -10,6 +12,45 @@
 // fString acts as a union of a small buffer optimized string or a string_view
 struct fString {
 public:
+    fString(const char* start, const char* end, const std::size_t hash) :
+        hash_(hash)
+    {
+        const std::size_t length = end - start;
+        if (length > 23) {
+            capacity_.isSmall = false;
+            stringView_ = std::string_view(start, length);
+        } else {
+            capacity_.isSmall = true;
+            capacity_.remaining = 23 - length;
+            std::memcpy(&internalString_[0], start, length);
+        }
+    }
+
+    fString(const word word) :
+        hash_(word.hash)
+    {
+        const std::size_t length = word.end - word.start;
+        if (length > 23) {
+            capacity_.isSmall = false;
+            stringView_ = std::string_view(word.start, length);
+        } else {
+            capacity_.isSmall = true;
+            capacity_.remaining = 23 - length;
+            std::memcpy(&internalString_[0], word.start, length);
+        }
+    }
+
+    constexpr fString(const char* str) :
+        hash_(stringUtils::hash(str)),
+        internalString_(),
+        capacity_({
+            .isSmall = true,
+            .remaining = static_cast<char>(23 - (stringUtils::size(str)))
+        })
+    {
+        std::memcpy(&internalString_[0], str, internalStringSize());
+    }
+
     inline auto size() const -> u64 {
         return isSmall() ? internalStringSize() : stringView_.length;
     }
@@ -34,7 +75,7 @@ public:
         return !(*this == other);
     }
 private:
-    std::size_t hash_;
+    const std::size_t hash_;
     union {
         char internalString_[23];
         std::string_view stringView_;
