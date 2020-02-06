@@ -8,6 +8,9 @@
 template <typename T, int N>
 struct monoAllocator {
 public:
+    monoAllocator() {
+        curr_ = last_ = nullptr;
+    }
     ~monoAllocator() {
         for (auto& s : slabs_) {
             std::free(s);
