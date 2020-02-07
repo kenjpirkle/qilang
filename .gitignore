@@ -32,3 +32,5 @@
 *.app
 bin/debug/qi
 bin/release/qi
+.vscode/launch.json
+.vscode/settings.json
