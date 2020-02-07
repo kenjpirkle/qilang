@@ -32,7 +32,7 @@ private:
 
     auto allocateSlab() -> void {
         curr_ = std::malloc(slabSize_);
-        last_ = curr_ + slabSize_ - sizeof(T);
+        last_ = curr_ + slabSize_;
         slabs_.emplace_back(curr_);
     }
 
