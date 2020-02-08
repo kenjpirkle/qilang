@@ -27,7 +27,7 @@ private:
     vector<thread> threads_;
     vector<bool> thread_states_;
     queue<string_view> file_queue_;
-    mono_allocator<string, 8> module_alloc_;
+    mono_allocator<string, 16> module_alloc_;
     unordered_map<string_view, string*> modules_;
 };
 
