@@ -4,8 +4,8 @@
 #include <string>
 
 static auto bucketArrayTest() -> void {
-    constexpr int NUM = 32;
-    bucketArray<std::string, 16> ba;
+    constexpr int NUM = 8192;
+    bucketArray<std::string, 1> ba;
     std::array<std::string*, NUM> arr;
     for (int i = 0; i < NUM; ++i) {
         arr[i] = ba.emplace("hello " + std::to_string(i));

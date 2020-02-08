@@ -35,7 +35,7 @@ public:
             bucket& b = *buckets_.emplace_back(new bucket());
             pos = b.emplace(std::forward<T>(element), 0);
             free_.bucketIndex = buckets_.size() - 1;
-            free_.index = 1;
+            free_.index = getNextFree();
         } else {
             // find place to insert new element
             const auto bucket = *std::find_if(
@@ -60,7 +60,7 @@ public:
         free_.bucketIndex = 0;
         uint index = buckets_[0]->indexOf(element);
 
-        while (index > N) {
+        while (index >= N) {
             ++free_.bucketIndex;
             index = buckets_[free_.bucketIndex]->indexOf(element);
         }
@@ -108,6 +108,10 @@ private:
 
     inline auto hasFree() const -> bool {
         return free_.index != -1;
+    }
+
+    constexpr auto getNextFree() -> int {
+        return N > 1 ? 1 : -1;
     }
 
     std::vector<bucket*> buckets_;
