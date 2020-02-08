@@ -5,7 +5,7 @@
 
 static auto monoAllocatorTest() -> void {
     constexpr int NUM = 16;
-    monoAllocator<std::string, 2> ma;
+    monoAllocator<std::string, 1> ma;
     std::array<std::string*, NUM> arr;
     for (int i = 0; i < NUM; ++i) {
         arr[i] = ma.emplaceBack("hello " + std::to_string(i));

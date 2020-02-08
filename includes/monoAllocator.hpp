@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 #include <vector>
 
 #pragma pack(push, 1)
@@ -21,24 +22,24 @@ public:
             allocateSlab();
         }
 
-        T* ptr = static_cast<T*>(curr_);
-        curr_ += sizeof(T);
-        *ptr = element;
+        *curr_ = element;
+        T* ptr = curr_;
+        ++curr_;
         return ptr;
     }
 
 private:
-    constexpr static int slabSize_ = sizeof(T) * N;
+    using slab = std::array<T, N>;
 
     auto allocateSlab() -> void {
-        curr_ = std::malloc(slabSize_);
-        last_ = curr_ + slabSize_;
-        slabs_.emplace_back(curr_);
+        auto s = slabs_.emplace_back(new slab);
+        curr_ = &((*s)[0]);
+        last_ = &((*s)[N]);
     }
 
-    void* curr_;
-    void* last_;
-    std::vector<void*> slabs_;
+    T* curr_;
+    T* last_;
+    std::vector<slab*> slabs_;
 };
 
 #pragma pack(pop)
