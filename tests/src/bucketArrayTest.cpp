@@ -1,39 +1,46 @@
 #include "bucketArray.hpp"
+#include "timerUtils.hpp"
 #include <iostream>
 #include <array>
 #include <string>
+#include <chrono>
 
+template <int NB, int N>
 static auto bucketArrayTest() -> void {
-    constexpr int NUM = 8192;
-    bucketArray<std::string, 1> ba;
-    std::array<std::string*, NUM> arr;
-    for (int i = 0; i < NUM; ++i) {
-        arr[i] = ba.emplace("hello " + std::to_string(i));
-    }
-    for (const auto& s : arr) {
-        std::cout << *s << '\n';
-    }
+    std::cout
+        << "bucketArrayTest\n"
+        << "NB: " << NB << " N: " << N << '\n';
 
-    std::cout << "count: " << ba.size() << '\n';
+    bucketArray<std::string, NB> ba;
+    std::array<std::string*, N> arr;
 
-    for (int i = 0; i < NUM; i += 2) {
-        ba.remove(arr[i]);
-        arr[i] = nullptr;
-    }
-    for (const auto& s : arr) {
-        if (s != nullptr) {
-            std::cout << *s << '\n';
-        }
-    }
+    timerUtils::bench(
+        [&]() {
+            for (int i = 0; i < N; ++i) {
+                arr[i] = ba.emplace("hello " + std::to_string(i));
+            }
+        },
+        "allocating"
+    );
 
-    std::cout << "count: " << ba.size() << '\n';
+    timerUtils::bench(
+        [&]() {
+            for (int i = 0; i < N; i += 2) {
+                ba.remove(arr[i]);
+                arr[i] = nullptr;
+            }
+        },
+        "removing"
+    );
 
-    for (int i = 0; i < NUM; i += 2) {
-        arr[i] = ba.emplace("hello " + std::to_string(i));
-    }
-    for (const auto& s : arr) {
-        std::cout << *s << '\n';
-    }
+    timerUtils::bench(
+        [&]() {
+            for (int i = 0; i < N; i += 2) {
+                arr[i] = ba.emplace("hello " + std::to_string(i));
+            }
+        },
+        "inserting"
+    );
 
-    std::cout << "count: " << ba.size() << '\n';
+    std::cout << "\n\n";
 }
