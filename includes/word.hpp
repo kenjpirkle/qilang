@@ -1,6 +1,6 @@
 #pragma once
 
-#include "typeDefinitions.hpp"
+#include "type_definitions.hpp"
 
 #pragma pack(push, 1)
 

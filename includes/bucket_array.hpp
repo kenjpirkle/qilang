@@ -8,11 +8,11 @@
 #pragma pack(push, 1)
 
 template <typename T, int N>
-struct bucketArray {
+struct bucket_array {
 public:
-    bucketArray() : 
+    bucket_array() : 
         free_({
-            .bucketIndex = 0,
+            .bucket_index = 0,
             .index = -1
         }),
         count_(0)
@@ -26,16 +26,16 @@ public:
     auto emplace(T&& element) -> T* {
         T* pos = nullptr;
 
-        if (hasFree()) {
-            auto& b = *buckets_[free_.bucketIndex];
+        if (has_free()) {
+            auto& b = *buckets_[free_.bucket_index];
             pos = b.emplace(std::forward<T>(element), free_.index);
             free_.index = -1;
-        } else if (count_ == maxSize()) {
+        } else if (count_ == max_size()) {
             // all buckets fully occupied, have to allocate a new one
             bucket& b = *buckets_.emplace_back(new bucket());
             pos = b.emplace(std::forward<T>(element), 0);
-            free_.bucketIndex = buckets_.size() - 1;
-            free_.index = getNextFree();
+            free_.bucket_index = buckets_.size() - 1;
+            free_.index = get_next_free();
         } else {
             // find place to insert new element
             const auto bucket = *std::find_if(
@@ -57,14 +57,14 @@ public:
 
     auto remove(T* element) -> void {
         // find bucket element is stored
-        free_.bucketIndex = 0;
-        uint index = buckets_[0]->indexOf(element);
+        free_.bucket_index = 0;
+        uint index = buckets_[0]->index_of(element);
 
         while (index >= N) {
-            ++free_.bucketIndex;
-            index = buckets_[free_.bucketIndex]->indexOf(element);
+            ++free_.bucket_index;
+            index = buckets_[free_.bucket_index]->index_of(element);
         }
-        buckets_[free_.bucketIndex]->removeAt(index);
+        buckets_[free_.bucket_index]->remove_at(index);
         free_.index = index;
         --count_;
     }
@@ -73,7 +73,7 @@ private:
         std::bitset<N> occupancies;
         std::array<T, N> elements;
 
-        constexpr auto maxSize() const -> int {
+        constexpr auto max_size() const -> int {
             return sizeof(T) * N;
         }
 
@@ -83,7 +83,7 @@ private:
             return &elements[index];
         }
 
-        inline auto indexOf(T* element) -> uint {
+        inline auto index_of(T* element) -> uint {
             return element - &elements[0];
         }
 
@@ -92,25 +92,25 @@ private:
             occupancies.flip(bit);
         }
 
-        inline auto removeAt(uint index) -> void {
+        inline auto remove_at(uint index) -> void {
             occupancies.flip(index);
         }
     };
 
     struct freeSlot {
-        int bucketIndex;
+        int bucket_index;
         int index;
     };
 
-    inline auto maxSize() const -> size_t {
+    inline auto max_size() const -> size_t {
         return N * buckets_.size();
     }
 
-    inline auto hasFree() const -> bool {
+    inline auto has_free() const -> bool {
         return free_.index != -1;
     }
 
-    constexpr auto getNextFree() -> int {
+    constexpr auto get_next_free() -> int {
         return N > 1 ? 1 : -1;
     }
 

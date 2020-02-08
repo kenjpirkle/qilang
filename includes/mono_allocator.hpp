@@ -7,19 +7,19 @@
 #pragma pack(push, 1)
 
 template <typename T, int N>
-struct monoAllocator {
+struct mono_allocator {
 public:
-    monoAllocator() {
+    mono_allocator() {
         curr_ = last_ = nullptr;
     }
-    ~monoAllocator() {
+    ~mono_allocator() {
         for (auto& s : slabs_) {
             std::free(s);
         }
     }
-    auto emplaceBack(T&& element) -> T* {
+    auto emplace_back(T&& element) -> T* {
         if (curr_ == last_) {
-            allocateSlab();
+            allocate_slab();
         }
 
         *curr_ = element;
@@ -31,7 +31,7 @@ public:
 private:
     using slab = std::array<T, N>;
 
-    auto allocateSlab() -> void {
+    auto allocate_slab() -> void {
         auto s = slabs_.emplace_back(new slab);
         curr_ = &((*s)[0]);
         last_ = &((*s)[N]);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "typeDefinitions.hpp"
-#include "monoAllocator.hpp"
+#include "type_definitions.hpp"
+#include "mono_allocator.hpp"
 #include <optional>
 #include <unordered_map>
 #include <mutex>
@@ -12,19 +12,19 @@
 
 #pragma pack(push, 1)
 
-struct compileContext {
+struct compile_context {
 public:
-    compileContext(const std::string_view);
+    compile_context(const std::string_view);
     auto add(const std::string_view) -> void;
     auto pop() -> std::optional<std::pair<std::string_view, std::string_view>>;
 
 private:
     std::mutex mutex_;
-    std::thread::id mainThreadId_;
+    std::thread::id main_thread_id_;
     std::vector<std::thread> threads_;
-    std::vector<bool> threadStates_;
-    std::queue<std::string_view> fileQueue_;
-    monoAllocator<std::string, 8> moduleAlloc_;
+    std::vector<bool> thread_states_;
+    std::queue<std::string_view> file_queue_;
+    mono_allocator<std::string, 8> module_alloc_;
     std::unordered_map<std::string_view, std::string*> modules_;
 };
 

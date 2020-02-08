@@ -1,21 +1,21 @@
-#include "monoAllocator.hpp"
-#include "timerUtils.hpp"
+#include "mono_allocator.hpp"
+#include "timer_utils.hpp"
 #include <array>
 #include <string>
 #include <iostream>
 
 template <int NB, int N> 
-static auto monoAllocatorTest() -> void {
+static auto mono_allocator_test() -> void {
     std::cout
-        << "monoAllocatorTest\n"
+        << "mono_allocator_test\n"
         << "NB: " << NB << " N: " << N << '\n';
-    monoAllocator<std::string, NB> ma;
+    mono_allocator<std::string, NB> ma;
     std::array<std::string*, N> arr;
 
-    timerUtils::bench(
+    timer_utils::bench(
         [&]() {
             for (int i = 0; i < N; ++i) {
-                arr[i] = ma.emplaceBack("hello " + std::to_string(i));
+                arr[i] = ma.emplace_back("hello " + std::to_string(i));
             }
         },
         "allocating"

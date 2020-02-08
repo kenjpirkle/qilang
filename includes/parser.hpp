@@ -1,8 +1,35 @@
 #pragma once
 
-#include "compileContext.hpp"
+#include "compile_context.hpp"
+#include "f_string.hpp"
+#include "word.hpp"
+#include <string>
+#include <vector>
+
+#pragma pack(push, 1)
 
 struct parser {
 public:
-    parser(compileContext* context);
+    parser() = delete;
+    parser(parser&) = delete;
+    parser(parser&&) = delete;
+    parser(compile_context*);
+
+private:
+    std::string source_;
+    std::vector<char*> lines_;
+    compile_context* context_;
+    char* peek_;
+
+    auto watch_for_modules() -> void;
+    auto process(const f_string file_name) -> void;
+    auto read_file(const f_string file_name) -> void;
+    auto lex_parse() -> void;
+    auto determine_symbol() -> void;
+    auto parse_id() -> word;
+    auto parse_underscore_id() -> word;
+    inline auto next_state() -> void;
+    inline auto error(const std::string& error_message) -> void;
 };
+
+#pragma pack(pop)

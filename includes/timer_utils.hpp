@@ -5,7 +5,7 @@
 #include <functional>
 #include <string>
 
-namespace timerUtils {
+namespace timer_utils {
     static inline auto bench(std::function<void()> f, const std::string& message) -> void {
         std::cout << message << ": ";
         auto start = std::chrono::steady_clock::now();
