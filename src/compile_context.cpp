@@ -24,9 +24,9 @@ auto compile_context::add(const string_view file_path) -> void {
 }
 
 auto compile_context::pop() -> pair<string_view, string_view> {
-
+    return { "test_file", "test_module" };
 }
 
 auto compile_context::cancelled() -> bool {
-
+    return false;
 }
