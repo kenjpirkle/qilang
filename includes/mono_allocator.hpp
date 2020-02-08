@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 
+using namespace std;
+
 #pragma pack(push, 1)
 
 template <typename T, int N>
@@ -14,7 +16,7 @@ public:
     }
     ~mono_allocator() {
         for (auto& s : slabs_) {
-            std::free(s);
+            free(s);
         }
     }
     auto emplace_back(T&& element) -> T* {
@@ -29,7 +31,7 @@ public:
     }
 
 private:
-    using slab = std::array<T, N>;
+    using slab = array<T, N>;
 
     auto allocate_slab() -> void {
         auto s = slabs_.emplace_back(new slab);
@@ -39,7 +41,7 @@ private:
 
     T* curr_;
     T* last_;
-    std::vector<slab*> slabs_;
+    vector<slab*> slabs_;
 };
 
 #pragma pack(pop)

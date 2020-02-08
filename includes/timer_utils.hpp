@@ -5,14 +5,16 @@
 #include <functional>
 #include <string>
 
+using namespace std;
+
 namespace timer_utils {
-    static inline auto bench(std::function<void()> f, const std::string& message) -> void {
-        std::cout << message << ": ";
-        auto start = std::chrono::steady_clock::now();
+    static inline auto bench(function<void()> f, const string& message) -> void {
+        cout << message << ": ";
+        auto start = chrono::steady_clock::now();
         f();
-        auto end = std::chrono::steady_clock::now();
-        std::cout
-            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+        auto end = chrono::steady_clock::now();
+        cout
+            << chrono::duration_cast<chrono::milliseconds>(end - start).count()
             << '\n';
     }   
 }

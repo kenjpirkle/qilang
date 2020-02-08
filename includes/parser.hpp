@@ -2,22 +2,24 @@
 
 #include "compile_context.hpp"
 #include "f_string.hpp"
+#include "type_definitions.hpp"
 #include "word.hpp"
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
+
+using namespace std;
 
 #pragma pack(push, 1)
 
 struct parser {
 public:
-    parser() = delete;
-    parser(parser&) = delete;
-    parser(parser&&) = delete;
     parser(compile_context*);
 
 private:
-    std::string source_;
-    std::vector<char*> lines_;
+    string source_;
+    vector<char*> lines_;
     compile_context* context_;
     char* peek_;
 
@@ -29,7 +31,7 @@ private:
     auto parse_id() -> word;
     auto parse_underscore_id() -> word;
     inline auto next_state() -> void;
-    inline auto error(const std::string& error_message) -> void;
+    inline auto error(const string& error_message) -> void;
 };
 
 #pragma pack(pop)

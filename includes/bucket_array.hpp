@@ -5,6 +5,8 @@
 #include <bitset>
 #include <vector>
 
+using namespace std;
+
 #pragma pack(push, 1)
 
 template <typename T, int N>
@@ -28,17 +30,17 @@ public:
 
         if (has_free()) {
             auto& b = *buckets_[free_.bucket_index];
-            pos = b.emplace(std::forward<T>(element), free_.index);
+            pos = b.emplace(forward<T>(element), free_.index);
             free_.index = -1;
         } else if (count_ == max_size()) {
             // all buckets fully occupied, have to allocate a new one
             bucket& b = *buckets_.emplace_back(new bucket());
-            pos = b.emplace(std::forward<T>(element), 0);
+            pos = b.emplace(forward<T>(element), 0);
             free_.bucket_index = buckets_.size() - 1;
             free_.index = get_next_free();
         } else {
             // find place to insert new element
-            const auto bucket = *std::find_if(
+            const auto bucket = *find_if(
                 buckets_.rbegin(),
                 buckets_.rend(),
                 [](const auto& buck) { return !buck->occupancies.all(); }
@@ -49,7 +51,7 @@ public:
                 ++ind;
             }
 
-            pos = bucket->emplace(std::forward<T>(element), ind);
+            pos = bucket->emplace(forward<T>(element), ind);
         }
         ++count_;
         return pos;
@@ -70,8 +72,8 @@ public:
     }
 private:
     struct bucket {
-        std::bitset<N> occupancies;
-        std::array<T, N> elements;
+        bitset<N> occupancies;
+        array<T, N> elements;
 
         constexpr auto max_size() const -> int {
             return sizeof(T) * N;
@@ -114,7 +116,7 @@ private:
         return N > 1 ? 1 : -1;
     }
 
-    std::vector<bucket*> buckets_;
+    vector<bucket*> buckets_;
     freeSlot free_;
     size_t count_;
 };

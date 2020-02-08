@@ -2,7 +2,6 @@
 
 #include "type_definitions.hpp"
 #include "mono_allocator.hpp"
-#include <optional>
 #include <unordered_map>
 #include <mutex>
 #include <string_view>
@@ -10,22 +9,26 @@
 #include <thread>
 #include <vector>
 
+using namespace std;
+
 #pragma pack(push, 1)
 
 struct compile_context {
 public:
-    compile_context(const std::string_view);
-    auto add(const std::string_view) -> void;
-    auto pop() -> std::optional<std::pair<std::string_view, std::string_view>>;
+    compile_context(const string_view);
+    auto add(const string_view) -> void;
+    auto pop() -> pair<string_view, string_view>;
+    auto cancelled() -> bool;
+    auto empty() -> bool;
 
 private:
-    std::mutex mutex_;
-    std::thread::id main_thread_id_;
-    std::vector<std::thread> threads_;
-    std::vector<bool> thread_states_;
-    std::queue<std::string_view> file_queue_;
-    mono_allocator<std::string, 8> module_alloc_;
-    std::unordered_map<std::string_view, std::string*> modules_;
+    mutex mutex_;
+    thread::id main_thread_id_;
+    vector<thread> threads_;
+    vector<bool> thread_states_;
+    queue<string_view> file_queue_;
+    mono_allocator<string, 8> module_alloc_;
+    unordered_map<string_view, string*> modules_;
 };
 
 #pragma pack(pop)
