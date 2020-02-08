@@ -1,9 +1,9 @@
 all: debug release
 
-rund: debug
+rund: $(DEBUG_TARGET)
 	./$(DEBUG_TARGET)
 
-runr: release
+runr: $(RELEASE_TARGET)
 	./$(RELEASE_TARGET)
 
 debug: cleand
