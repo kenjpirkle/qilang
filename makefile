@@ -7,10 +7,10 @@ runr: release
 	./$(RELEASE_TARGET)
 
 debug: cleand
-	$(CC) $(INCLUDES) $(DEBUG_FLAGS) -o $(DEBUG_TARGET) src/main.cpp
+	$(CC) $(INCLUDES) $(DEBUG_FLAGS) -o $(DEBUG_TARGET) $(SRC)
 
 release: cleanr
-	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) src/main.cpp
+	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) $(SRC)
 
 
 clean: cleand cleanr
@@ -30,3 +30,4 @@ DEBUG_FLAGS = -ggdb3 -Wextra -Wno-pointer-arith -pthread -std=c++17
 RELEASE_FLAGS = -Wextra -Wno-pointer-arith -pthread -std=c++17 -Ofast
 
 INCLUDES = -I./includes/
+SRC = src/parser.cpp src/compile_context.cpp src/main.cpp
