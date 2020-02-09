@@ -65,10 +65,10 @@ public:
         hash_(string_utils::hash(str)),
         capacity_({
             .is_small = true,
-            .remaining = static_cast<int>(N - (string_utils::size(str)))
+            .remaining = static_cast<int>(N - string_utils::size(str))
         })
     {
-        string_utils::copy(&str[0], &str[N - 1], &internal_.string_[0]);
+        string_utils::copy(&str[0], &str[S - 1], &internal_.string_[0]);
     }
 
     auto operator =(const f_string& other) -> f_string& {
