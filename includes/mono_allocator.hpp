@@ -13,52 +13,45 @@ using namespace std;
 template <typename T, int N, int SN = 0>
 struct mono_allocator {
 public:
-    mono_allocator() {
-        buffer_ = buffer_variant {
-            in_place_index_t<1>{},
-            large_buffer {
-                .curr = nullptr,
-                .last = nullptr,
-                .slabs = {}
-            }
-        };
+    constexpr mono_allocator() {
+        if constexpr (SN == 0) {
+            // no stack buffer
+            curr_ = last_ = nullptr;
+        } else {
+            // in place stack buffer optimization
+            curr_ = &stack_buffer_[0];
+            last_ = &stack_buffer_[SN * N];
+        }
     }
     ~mono_allocator() {
-        for (auto& s : large().slabs) {
+        for (auto& s : heap_buffer_) {
             delete s;
         }
     }
+
     auto emplace_back(T&& element) -> T* {
-        if (large().curr == large().last) {
+        if (curr_ == last_) {
             allocate_slab();
         }
 
-        *large().curr = element;
-        T* ptr = large().curr;
-        ++large().curr;
+        *curr_ = element;
+        T* ptr = curr_;
+        ++curr_;
         return ptr;
     }
 
 private:
     using slab = array<T, N>;
-    using small_size_slabs = array<slab, SN>;
-    struct large_buffer {
-        T* curr;
-        T* last;
-        vector<slab*> slabs;
-    };
-    using buffer_variant = variant<small_size_slabs, large_buffer>;
 
-    buffer_variant buffer_;
+    T* curr_;
+    T* last_;
+    array<T, SN * N> stack_buffer_;
+    vector<slab*> heap_buffer_;
 
     auto allocate_slab() -> void {
-        auto s = large().slabs.emplace_back(new slab);
-        large().curr = &((*s)[0]);
-        large().last = &((*s)[N]);
-    }
-
-    inline auto large() -> large_buffer& {
-        return get<1>(buffer_);
+        auto s = heap_buffer_.emplace_back(new slab);
+        curr_ = &((*s)[0]);
+        last_ = &((*s)[N]);
     }
 };
 
