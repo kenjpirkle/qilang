@@ -20,7 +20,7 @@ public:
         } else {
             // in place stack buffer optimization
             curr_ = &stack_buffer_[0];
-            last_ = &stack_buffer_[SN * N];
+            last_ = &stack_buffer_[SN];
         }
     }
     
@@ -46,7 +46,7 @@ private:
 
     T* curr_;
     T* last_;
-    array<T, SN * N> stack_buffer_;
+    array<T, SN> stack_buffer_;
     vector<slab*> heap_buffer_;
 
     auto allocate_slab() -> void {
