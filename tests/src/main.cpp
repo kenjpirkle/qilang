@@ -2,6 +2,7 @@
 #include "mono_allocator_test.cpp"
 #include "f_string_test.cpp"
 #include "mono_allocator.hpp"
+#include "f_string.hpp"
 #include <iostream>
 #include <string>
 
@@ -33,5 +34,10 @@ auto main() -> int {
     f_string_test<3, 128>();
     f_string_test<4, 1024>();
     f_string_test<5, 2048>();
+
+    f_string<23> f1 = "f1 f_string";
+    std::cout << f1 << '\n';
+    f_string<127> f2 = "f2 f_string";
+    std::cout << f2 << '\n';
     return 0;
 }
