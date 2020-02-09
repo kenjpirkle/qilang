@@ -6,12 +6,12 @@
 
 using namespace std;
 
-template <int NB, int N> 
+template <int NB, int N, int SN = 0> 
 static auto mono_allocator_test() -> void {
     cout
         << "mono_allocator_test\n"
-        << "NB: " << NB << " N: " << N << '\n';
-    mono_allocator<string, NB> ma;
+        << "NB: " << NB << " N: " << N << " SN: " << SN << '\n';
+    mono_allocator<string, NB, SN> ma;
     array<string*, N> arr;
 
     timer_utils::bench(
