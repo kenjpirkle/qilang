@@ -23,6 +23,7 @@ public:
             last_ = &stack_buffer_[SN * N];
         }
     }
+    
     ~mono_allocator() {
         for (auto& s : heap_buffer_) {
             delete s;
