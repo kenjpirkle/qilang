@@ -108,7 +108,7 @@ public:
         return strm << 
             (fs.is_small() 
                 ? string_view(&fs.internal_.string_[0], fs.internal_string_size())
-                : string_view(fs.internal_.start_, fs.size()));
+                : string_view(fs.internal_.start_, fs.internal_.end_ - fs.internal_.start_));
     }
 private:
     size_t hash_;
