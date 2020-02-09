@@ -32,4 +32,4 @@ RELEASE_FLAGS = -Wextra -Wno-pointer-arith -pthread -std=c++17 -Ofast
 INCLUDES = -I../includes/
 
 SRC_DIR = src/
-SRC_FILES = $(SRC_DIR)mono_allocator_test.cpp $(SRC_DIR)bucket_array_test.cpp $(SRC_DIR)main.cpp
+SRC_FILES = $(SRC_DIR)f_string_test.cpp $(SRC_DIR)mono_allocator_test.cpp $(SRC_DIR)bucket_array_test.cpp $(SRC_DIR)main.cpp
