@@ -3,6 +3,7 @@
 #include "type_definitions.hpp"
 #include "word.hpp"
 #include "string_utils.hpp"
+#include <string>
 #include <string_view>
 
 using namespace std;
@@ -10,50 +11,77 @@ using namespace std;
 #pragma pack(push, 1)
 
 // f_string acts as a union of a small buffer optimized string and a string_view
+template <int N = 23>
 struct f_string {
 public:
+    f_string() = default;
+
     f_string(const char* start, const char* end, const size_t hash) :
         hash_(hash)
     {
         const size_t length = end - start;
-        if (length > 23) {
+        if (length > N) {
             capacity_.is_small = false;
-            string_view_ = string_view(start, length);
+            internal_.start_ = start;
+            internal_.end_ = end;
         } else {
             capacity_.is_small = true;
-            capacity_.remaining = 23 - length;
-            memcpy(&internal_string_[0], start, length);
+            capacity_.remaining = N - length;
+            memcpy(&internal_.string_[0], start, length);
         }
     }
 
-    f_string(const word word) :
+    f_string(const word& word) :
         hash_(word.hash)
     {
         const size_t length = word.end - word.start;
-        if (length > 23) {
+        if (length > N) {
             capacity_.is_small = false;
-            string_view_ = string_view(word.start, length);
+            internal_.start_ = word.start;
+            internal_.end_ = word.end;
         } else {
             capacity_.is_small = true;
-            capacity_.remaining = 23 - length;
-            memcpy(&internal_string_[0], word.start, length);
+            capacity_.remaining = N - length;
+            memcpy(&internal_.string_[0], word.start, length);
         }
     }
 
-    template<size_t N>
-    constexpr f_string(const char (&str)[N]) :
+    f_string(string str) :
+        hash_(string_utils::hash(str))
+    {
+        if (str.length() > N) {
+            capacity_.is_small = false;
+            internal_.start_ = str.data();
+            internal_.end_ = &str.data()[str.length()] ;
+        } else {
+            capacity_.is_small = true;
+            capacity_.remaining = N - str.length();
+            memcpy(&internal_.string_[0], str.data(), str.length());
+        }   
+    }
+
+    template<size_t S>
+    constexpr f_string(const char (&str)[S]) :
         hash_(string_utils::hash(str)),
-        internal_string_(),
         capacity_({
             .is_small = true,
-            .remaining = static_cast<char>(23 - (string_utils::size(str)))
+            .remaining = static_cast<int>(N - (string_utils::size(str)))
         })
     {
-        string_utils::copy(&str[0], &str[N - 1], &internal_string_[0]);
+        string_utils::copy(&str[0], &str[N - 1], &internal_.string_[0]);
+    }
+
+    auto operator =(const f_string& other) -> f_string& {
+        if (&other == this) {
+            return *this;
+        } else {
+            memcpy(this, &other, sizeof(other));
+            return *this;
+        }
     }
 
     constexpr auto size() const -> u64 {
-        return is_small() ? internal_string_size() : string_view_.length();
+        return is_small() ? internal_string_size() : internal_.end_ - internal_.start_;
     }
 
     inline auto operator ==(const f_string& other) const -> bool {
@@ -61,14 +89,14 @@ public:
             return false;
         } else if (capacity_.is_small) {
             return memcmp(
-                &internal_string_,
-                &other.internal_string_,
+                &internal_.string_,
+                &other.internal_.string_,
                 internal_string_size()) == 0;
         } else {
-            return memcmp(
-                &string_view_[0],
-                &other.string_view_[0],
-                string_view_.size()) == 0;
+            return (
+                (internal_.start_ == other.internal_.start_) &&
+                (internal_.end_ == other.internal_.end_)
+            );
         }
     }
 
@@ -79,22 +107,36 @@ public:
     friend auto operator <<(ostream& strm, const f_string& fs) -> ostream& {
         return strm << 
             (fs.is_small() 
-                ? string_view(&fs.internal_string_[0], fs.internal_string_size())
-                : fs.string_view_);
+                ? string_view(&fs.internal_.string_[0], fs.internal_string_size())
+                : string_view(fs.internal_.start_, fs.size()));
     }
 private:
-    const size_t hash_;
+    size_t hash_;
     union {
-        char internal_string_[23];
-        string_view string_view_;
-    };
+        char string_[N];
+        struct {
+            char* start_;
+            char* end_;
+        };
+    } internal_;
+
+    constexpr static auto bits_required() -> int {
+        int value = N;
+        int count = 0;
+        while (value > 0) {
+            count++;
+            value = value >> 1;
+        }
+
+        return count + 1;
+    }
     struct small_capacity {
-        bool is_small   : 1;
-        char remaining : 7;
+        bool is_small : 1;
+        int remaining : bits_required();
     } capacity_;
 
     constexpr auto internal_string_size() const -> u64 {
-        return 23 - capacity_.remaining;
+        return N - capacity_.remaining;
     }
 
     constexpr auto is_small() const -> bool {
