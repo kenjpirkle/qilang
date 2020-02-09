@@ -24,14 +24,14 @@ private:
     char* peek_;
 
     auto watch_for_modules() -> void;
-    auto process(const f_string file_name) -> void;
-    auto read_file(const f_string file_name) -> void;
+    auto process(const f_string<>) -> void;
+    auto read_file(const f_string<>) -> void;
     auto lex_parse() -> void;
     auto determine_symbol() -> void;
     auto parse_id() -> word;
     auto parse_underscore_id() -> word;
     inline auto next_state() -> void;
-    inline auto error(const string& error_message) -> void;
+    inline auto error(const string&) -> void;
 };
 
 #pragma pack(pop)
