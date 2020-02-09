@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <stdexcept>
+#include <string>
 
 using namespace std;
 
@@ -23,6 +24,15 @@ namespace string_utils {
             h <<= 7;
             h += *c;
             ++c;
+        }
+        return h;
+    }
+
+    static auto hash(const string str) -> size_t {
+        size_t h = 0;
+        for (const auto& c : str) {
+            h <<= 7;
+            h += c;
         }
         return h;
     }
