@@ -35,9 +35,16 @@ auto main() -> int {
     f_string_test<4, 1024>();
     f_string_test<5, 2048>();
 
-    f_string<23> f1 = "f1 f_string";
-    std::cout << f1 << '\n';
-    f_string<127> f2 = "f2 f_string";
-    std::cout << f2 << '\n';
+    f_string<23>  f1 = "f_string";
+    f_string<127> f2 = "f_string";
+    f_string<127> f3 = "f_string";
+    std::cout << (f1 == f2 ? "f1 == f2" : "f1 != f2") << '\n';
+    std::cout << (f2 == f3 ? "f2 == f3" : "f2 != f3") << "\n\n\n";
+
+    f_string<126> f4 = f3;
+    std::cout << "f3: " << f3 << "\tf4: " << f4 << '\n';
+
+    f_string<1> f5 = f4;
+    std::cout << "f5: " << f5 << '\n';
     return 0;
 }

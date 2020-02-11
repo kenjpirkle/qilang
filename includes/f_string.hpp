@@ -13,62 +13,81 @@ using namespace std;
 // f_string acts as a union of a small buffer optimized string and a string_view
 template <int N = 23>
 struct f_string {
-public:
     f_string() = default;
 
+    template <int S1>
+    f_string(f_string<S1>& other) :
+        hash(other.hash)
+    {
+        u64 other_size = other.size();
+        if (other_size > N) {
+            capacity.is_small = false;
+            internal_data.start = other.data();
+            internal_data.end = &other.data()[other.is_small() ? other.internal_size() : other.external_size()];
+        } else {
+            capacity.is_small = true;
+            capacity.remaining = N - other_size;
+            memcpy(
+                &internal_data.string[0],
+                other.data(),
+                other_size
+            );
+        }
+    }
+
     f_string(const char* start, const char* end, const size_t hash) :
-        hash_(hash)
+        hash(hash)
     {
         const size_t length = end - start;
         if (length > N) {
-            capacity_.is_small = false;
-            internal_.start_ = start;
-            internal_.end_ = end;
+            capacity.is_small = false;
+            internal_data.start_ = start;
+            internal_data.end_ = end;
         } else {
-            capacity_.is_small = true;
-            capacity_.remaining = N - length;
-            memcpy(&internal_.string_[0], start, length);
+            capacity.is_small = true;
+            capacity.remaining = N - length;
+            memcpy(&internal_data.string[0], start, length);
         }
     }
 
     f_string(const word& word) :
-        hash_(word.hash)
+        hash(word.hash)
     {
         const size_t length = word.end - word.start;
         if (length > N) {
-            capacity_.is_small = false;
-            internal_.start_ = word.start;
-            internal_.end_ = word.end;
+            capacity.is_small = false;
+            internal_data.start = word.start;
+            internal_data.end = word.end;
         } else {
-            capacity_.is_small = true;
-            capacity_.remaining = N - length;
-            memcpy(&internal_.string_[0], word.start, length);
+            capacity.is_small = true;
+            capacity.remaining = N - length;
+            memcpy(&internal_data.string[0], word.start, length);
         }
     }
 
     f_string(string str) :
-        hash_(string_utils::hash(str))
+        hash(string_utils::hash(str))
     {
         if (str.length() > N) {
-            capacity_.is_small = false;
-            internal_.start_ = str.data();
-            internal_.end_ = &str.data()[str.length()] ;
+            capacity.is_small = false;
+            internal_data.start = str.data();
+            internal_data.end = &str.data()[str.length()] ;
         } else {
-            capacity_.is_small = true;
-            capacity_.remaining = N - str.length();
-            memcpy(&internal_.string_[0], str.data(), str.length());
+            capacity.is_small = true;
+            capacity.remaining = N - str.length();
+            memcpy(&internal_data.string[0], str.data(), str.length());
         }   
     }
 
     template<size_t S>
     constexpr f_string(const char (&str)[S]) :
-        hash_(string_utils::hash(str)),
-        capacity_({
+        hash(string_utils::hash(str)),
+        capacity({
             .is_small = true,
             .remaining = static_cast<int>(N - string_utils::size(str))
         })
     {
-        string_utils::copy(&str[0], &str[S - 1], &internal_.string_[0]);
+        string_utils::copy(&str[0], &str[S - 1], &internal_data.string[0]);
     }
 
     auto operator =(const f_string& other) -> f_string& {
@@ -79,24 +98,71 @@ public:
             return *this;
         }
     }
+    
+    template <int S1>
+    inline auto operator ==(const f_string<S1>& other) const -> bool {
+        if (is_small()) {
+            if (other.is_small()) {
+                if (internal_size() != other.internal_size()) {
+                    return false;
+                } else {
+                    return memcmp(
+                        &internal_data.string[0],
+                        &other.internal_data.string[0],
+                        internal_size()
+                    ) == 0;
+                }
+            } else {
+                if (internal_size() != other.external_size()) {
+                    return false;
+                } else {
+                    return memcmp(
+                        &internal_data.string[0],
+                        other.internal_data.start,
+                        internal_size()
+                    ) == 0;
+                }
+            }
+        } else {
+            if (other.is_small()) {
+                if (external_size() != other.internal_size()) {
+                    return false;
+                } else {
+                    return memcmp(
+                        internal_data.start,
+                        &other.internal_data.string[0],
+                        other.internal_size()
+                    ) == 0;
+                }
+            } else {
+                if (external_size() != other.external_size()) {
+                    return false;
+                } else {
+                    return memcmp(
+                        internal_data.start,
+                        &other.internal_data.start,
+                        external_size()
+                    ) == 0;
+                }
+            }
+        }
+    }
 
-    constexpr auto size() const -> u64 {
-        return is_small() ? internal_string_size() : internal_.end_ - internal_.start_;
+    template <int S1>
+    inline auto operator !=(const f_string<S1>& other) const -> bool {
+        return !(*this == other);
     }
 
     inline auto operator ==(const f_string& other) const -> bool {
         if (size() != other.size()) {
             return false;
-        } else if (capacity_.is_small) {
+        } else if (is_small()) {
             return memcmp(
-                &internal_.string_,
-                &other.internal_.string_,
-                internal_string_size()) == 0;
+                &internal_data.string,
+                &other.internal_data.string,
+                internal_size()) == 0;
         } else {
-            return (
-                (internal_.start_ == other.internal_.start_) &&
-                (internal_.end_ == other.internal_.end_)
-            );
+            return internal_data.start == other.internal_data.start;
         }
     }
 
@@ -104,43 +170,55 @@ public:
         return !(*this == other);
     }
 
-    friend auto operator <<(ostream& strm, const f_string& fs) -> ostream& {
+    friend inline auto operator <<(ostream& strm, const f_string& fs) -> ostream& {
         return strm << 
             (fs.is_small() 
-                ? string_view(&fs.internal_.string_[0], fs.internal_string_size())
-                : string_view(fs.internal_.start_, fs.internal_.end_ - fs.internal_.start_));
+                ? string_view(&fs.internal_data.string[0], fs.internal_size())
+                : string_view(fs.internal_data.start, fs.internal_data.end - fs.internal_data.start));
     }
-private:
-    size_t hash_;
-    union {
-        char string_[N];
-        struct {
-            char* start_;
-            char* end_;
-        };
-    } internal_;
 
-    constexpr static auto bits_required() -> int {
+    size_t hash;
+    union {
+        char string[N];
+        struct {
+            char* start;
+            char* end;
+        };
+    } internal_data;
+
+    constexpr inline static auto bits_required() -> int {
         int value = N;
         int count = 0;
         while (value > 0) {
             count++;
             value = value >> 1;
         }
-
         return count + 1;
     }
+
     struct small_capacity {
         bool is_small : 1;
         int remaining : bits_required();
-    } capacity_;
+    } capacity;
 
-    constexpr auto internal_string_size() const -> u64 {
-        return N - capacity_.remaining;
+    constexpr inline auto internal_size() const -> u64 {
+        return N - capacity.remaining;
     }
 
-    constexpr auto is_small() const -> bool {
-        return capacity_.is_small;
+    constexpr inline auto external_size() const -> u64 {
+        return internal_data.end - internal_data.start;
+    }
+
+    constexpr inline auto is_small() const -> bool {
+        return capacity.is_small;
+    }
+
+    constexpr inline auto size() const -> u64 {
+        return is_small() ? internal_size() : external_size();
+    }
+
+    constexpr inline auto data() -> char* {
+        return is_small() ? &internal_data.string[0] : internal_data.start;
     }
 };
 
