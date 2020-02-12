@@ -223,3 +223,10 @@ struct f_string {
 };
 
 #pragma pack(pop)
+
+template <int N>
+struct f_string_hasher {
+    inline auto operator ()(const f_string<N>& fs) const -> std::size_t {
+        return fs.hash;
+    }
+};
