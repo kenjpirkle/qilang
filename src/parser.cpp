@@ -1,24 +1,23 @@
 #include "parser.hpp"
+#include <algorithm>
+#include <fstream>
+#include <iostream>
 
-parser::parser(compile_context* context, f_string<23> file_path, string* mod) :
+parser::parser(compile_context* context, file_module) :
     context_(context)
 {
-    process(file_path, mod);
     watch_for_modules();
 }
 
-auto parser::process(f_string<23> file_path, string* mod) -> void {
-
-}
-
 auto parser::watch_for_modules() -> void {
-    pair<f_string<23>, string_view> file_module;
+    file_module file_mod;
     do {
         if (context_->try_lock()) {
             if (!context_->empty()) {
-                file_module = context_->pop();
+                file_mod = context_->pop();
                 state = parser_state::working;
                 context_->unlock();
+                read_file(file_mod.file_path);
                 // parse file
 
             } else {
@@ -31,4 +30,20 @@ auto parser::watch_for_modules() -> void {
             }
         }
     } while (true);
+}
+
+auto parser::read_file(f_string<23> file_path) -> void {
+    // TODO: f_string needs null terminator to avoid converting to string_view
+    string_view sv(file_path.data(), file_path.size());
+    ifstream in(sv.data(), ios::in | ios::binary);
+    if (in) {
+        in.seekg(0, ios::end);
+        source_.resize(1 + (int)in.tellg());
+        in.seekg(0, ios::beg);
+        in.read(&source_[0], source_.size());
+        source_.back() = '\0';
+        in.close();
+    } else {
+        throw(errno);
+    }
 }
