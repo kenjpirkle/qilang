@@ -10,7 +10,8 @@ compile_context::compile_context(const f_string<23>& initial_file_path) {
     threads_.reserve(num_threads - 1);
     
     auto mod = modules_.emplace(initial_file_path, module_alloc_.emplace_back(module())).first->second;
-    parsers_.emplace_back(this, file_module { initial_file_path, mod });
+    auto& parser = parsers_.emplace_back(this);
+    parser.process({ initial_file_path, mod });
 }
 
 auto compile_context::add(const f_string<23>& file_path) -> void {
@@ -21,11 +22,7 @@ auto compile_context::add(const f_string<23>& file_path) -> void {
                     auto mod = modules_.emplace(file_path, module_alloc_.emplace_back(module())).first->second;
                     auto& parser = parsers_.emplace_back(this);
                     auto& thr = threads_.emplace_back(
-                        std::thread(
-                            [&]() {
-                                parser.process({ file_path, mod });
-                            }
-                        )
+                        std::thread([&]() { parser.process({ file_path, mod }); })
                     );
                     unlock();
                     thr.detach();
