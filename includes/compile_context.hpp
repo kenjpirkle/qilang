@@ -1,8 +1,8 @@
 #pragma once
 
-#include "parser.hpp"
-#include "f_string.hpp"
+#include "file_module.hpp"
 #include "mono_allocator.hpp"
+#include "parser.hpp"
 #include "type_definitions.hpp"
 #include <unordered_map>
 #include <mutex>
@@ -21,7 +21,7 @@ struct compile_context {
 public:
     compile_context(const f_string<23>);
     auto add(const f_string<23>) -> void;
-    auto pop() -> pair<f_string<23>, string_view>;
+    auto pop() -> file_module;
     auto cancel() -> void;
     auto cancelled() const -> bool;
     auto finished() const -> bool;
@@ -35,8 +35,8 @@ private:
     vector<thread> threads_;
     vector<parser> parsers_;
     queue<f_string<23>> file_queue_;
-    mono_allocator<f_string<23>, 16> module_alloc_;
-    unordered_map<f_string<23>, string*, f_string_hasher<23>> modules_;
+    mono_allocator<module, 16> module_alloc_;
+    unordered_map<f_string<23>, module*, f_string_hasher<23>> modules_;
 };
 
 #pragma pack(pop)
