@@ -5,7 +5,6 @@
 #include "parser_state.hpp"
 #include "type_definitions.hpp"
 #include "word.hpp"
-#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -18,7 +17,8 @@ struct compile_context;
 
 struct parser {
 public:
-    parser(compile_context*, file_module);
+    parser(compile_context*);
+    auto process(file_module) -> void;
     parser_state state;
 
 private:
@@ -29,7 +29,7 @@ private:
     char* peek_;
 
     auto watch_for_modules() -> void;
-    auto read_file(f_string<23>) -> void;
+    auto read_file(f_string<23>&) -> void;
     auto lex_parse() -> void;
     auto determine_symbol() -> void;
     auto parse_id() -> word;

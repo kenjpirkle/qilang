@@ -3,9 +3,11 @@
 #include <fstream>
 #include <iostream>
 
-parser::parser(compile_context* context, file_module) :
-    context_(context)
-{
+parser::parser(compile_context* context) : context_(context) {}
+
+auto parser::process(file_module file_mod) -> void {
+    read_file(file_mod.file_path);
+    lex_parse();
     watch_for_modules();
 }
 
@@ -32,7 +34,7 @@ auto parser::watch_for_modules() -> void {
     } while (true);
 }
 
-auto parser::read_file(f_string<23> file_path) -> void {
+auto parser::read_file(f_string<23>& file_path) -> void {
     // TODO: f_string needs null terminator to avoid converting to string_view
     string_view sv(file_path.data(), file_path.size());
     ifstream in(sv.data(), ios::in | ios::binary);
@@ -46,4 +48,8 @@ auto parser::read_file(f_string<23> file_path) -> void {
     } else {
         throw(errno);
     }
+}
+
+auto parser::lex_parse() -> void {
+
 }
