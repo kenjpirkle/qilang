@@ -89,15 +89,6 @@ struct f_string {
     {
         string_utils::copy(&str[0], &str[S - 1], &internal_data.string[0]);
     }
-
-    auto operator =(const f_string& other) -> f_string& {
-        if (&other == this) {
-            return *this;
-        } else {
-            memcpy(this, &other, sizeof(other));
-            return *this;
-        }
-    }
     
     template <int S1>
     inline auto operator ==(const f_string<S1>& other) const -> bool {
