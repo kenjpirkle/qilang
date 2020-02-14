@@ -1,9 +1,8 @@
 #pragma once
 
+#include "parser.hpp"
 #include "f_string.hpp"
 #include "mono_allocator.hpp"
-#include "parser.hpp"
-#include "thread_state.hpp"
 #include "type_definitions.hpp"
 #include <unordered_map>
 #include <mutex>
@@ -28,10 +27,12 @@ public:
     auto finished() const -> bool;
     auto empty() const -> bool;
     auto contains(const f_string<23>) const -> bool;
+    auto try_lock() -> bool;
+    auto unlock() -> void;
 
 private:
     mutex mutex_;
-    thread::id main_thread_id_;
+    vector<thread> threads_;
     vector<parser> parsers_;
     queue<f_string<23>> file_queue_;
     mono_allocator<f_string<23>, 16> module_alloc_;
