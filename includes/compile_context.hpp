@@ -19,14 +19,14 @@ struct parser;
 
 struct compile_context {
 public:
-    compile_context(const f_string<23>);
-    auto add(const f_string<23>) -> void;
+    compile_context(const f_string<23>&);
+    auto add(const f_string<23>&) -> void;
     auto pop() -> file_module;
     auto cancel() -> void;
     auto cancelled() const -> bool;
     auto finished() const -> bool;
     auto empty() const -> bool;
-    auto contains(const f_string<23>) const -> bool;
+    auto contains(const f_string<23>&) const -> bool;
     auto try_lock() -> bool;
     auto unlock() -> void;
 

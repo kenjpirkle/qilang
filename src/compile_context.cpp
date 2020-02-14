@@ -3,7 +3,7 @@
 
 using namespace std;
 
-compile_context::compile_context(const f_string<23> initial_file_path) {
+compile_context::compile_context(const f_string<23>& initial_file_path) {
     const auto num_threads = thread::hardware_concurrency();
 
     parsers_.reserve(num_threads);
@@ -13,16 +13,17 @@ compile_context::compile_context(const f_string<23> initial_file_path) {
     parsers_.emplace_back(this, file_module { initial_file_path, mod });
 }
 
-auto compile_context::add(const f_string<23> file_path) -> void {
+auto compile_context::add(const f_string<23>& file_path) -> void {
     do {
         if (try_lock()) {
             if (modules_.find(file_path) != modules_.end()) {
                 if (threads_.size() < thread::hardware_concurrency() - 1) {
                     auto mod = modules_.emplace(file_path, module_alloc_.emplace_back(module())).first->second;
+                    auto& parser = parsers_.emplace_back(this);
                     auto& thr = threads_.emplace_back(
                         std::thread(
                             [&]() {
-                                parsers_.emplace_back(this, file_module { file_path, mod });
+                                parser.process({ file_path, mod });
                             }
                         )
                     );
@@ -78,7 +79,7 @@ auto compile_context::empty() const -> bool {
     return file_queue_.empty();
 }
 
-auto compile_context::contains(const f_string<23> file_path) const -> bool {
+auto compile_context::contains(const f_string<23>& file_path) const -> bool {
     return modules_.find(file_path) != modules_.end();
 }
 
