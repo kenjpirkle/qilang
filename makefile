@@ -13,13 +13,16 @@ release: cleanr parser compile_context main
 	$(CC) $(INCLUDES) $(RELEASE_FLAGS) -o $(RELEASE_TARGET) $(OBJS)
 
 
-clean: cleand cleanr
+clean: cleand cleanr cleano
 
 cleand:
 	$(RM) $(DEBUG_TARGET)
 
 cleanr:
 	$(RM) $(RELEASE_TARGET)
+
+cleano:
+	$(RM) $(OBJS)
 
 parser:
 	$(CC) $(INCLUDES) $(DEBUG_FLAGS) -c src/parser.cpp -o $(OBJ_PATH)parser.o
