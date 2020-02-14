@@ -16,5 +16,7 @@ auto parser::watch_for_modules() -> void {
             file_module = context_->pop();
             // parse file
         }
-    } while (!context_->cancelled());
+
+        thr_state = thread_state::finished;
+    } while (!context_->cancelled() && !context_->finished());
 }
