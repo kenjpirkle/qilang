@@ -2,13 +2,12 @@
 
 #include "compile_context.hpp"
 #include "f_string.hpp"
-#include "thread_state.hpp"
+#include "parser_state.hpp"
 #include "type_definitions.hpp"
 #include "word.hpp"
 #include <optional>
 #include <string>
 #include <string_view>
-#include <thread>
 #include <vector>
 
 using namespace std;
@@ -19,18 +18,17 @@ struct compile_context;
 
 struct parser {
 public:
-    parser(compile_context*);
-    thread_state thr_state;
+    parser(compile_context*, f_string<23>, string*);
+    parser_state state;
 
 private:
-    thread thread_;
     string source_;
     vector<char*> lines_;
     compile_context* context_;
     char* peek_;
 
     auto watch_for_modules() -> void;
-    auto process(const f_string<>) -> void;
+    auto process(const f_string<23>, string*) -> void;
     auto read_file(const f_string<>) -> void;
     auto lex_parse() -> void;
     auto determine_symbol() -> void;
