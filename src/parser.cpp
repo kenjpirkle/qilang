@@ -11,7 +11,7 @@ auto parser::process(file_module file_mod) -> void {
     watch_for_modules();
 }
 
-inline auto parser::finished() const -> bool {
+auto parser::finished() const -> bool {
     return finished_;
 }
 

@@ -54,7 +54,7 @@ struct parser {
 public:
     parser(compile_context*);
     auto process(file_module) -> void;
-    inline auto finished() const -> bool;
+    auto finished() const -> bool;
 
 private:
     bool finished_;

@@ -62,7 +62,7 @@ auto compile_context::finished() const -> bool {
         parsers_.begin(),
         parsers_.end(),
         [](const auto& p) {
-            return p.state == parser_state::finished;
+            return p.finished();
         }
     );
 }
@@ -75,10 +75,10 @@ auto compile_context::contains(const f_string<23>& file_path) const -> bool {
     return modules_.find(file_path) != modules_.end();
 }
 
-inline auto compile_context::lock() -> void {
+auto compile_context::lock() -> void {
     mutex_.lock();
 }
 
-inline auto compile_context::unlock() -> void {
+auto compile_context::unlock() -> void {
     mutex_.unlock();
 }

@@ -27,8 +27,8 @@ public:
     auto finished() const -> bool;
     auto empty() const -> bool;
     auto contains(const f_string<23>&) const -> bool;
-    inline auto lock() -> void;
-    inline auto unlock() -> void;
+    auto lock() -> void;
+    auto unlock() -> void;
 
 private:
     mutex mutex_;
