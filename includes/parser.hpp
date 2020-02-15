@@ -4,7 +4,6 @@
 #include "compile_context.hpp"
 #include "file_module.hpp"
 #include "keyword.hpp"
-#include "parser_state.hpp"
 #include "type_definitions.hpp"
 #include "word.hpp"
 #include <string>
@@ -55,9 +54,10 @@ struct parser {
 public:
     parser(compile_context*);
     auto process(file_module) -> void;
-    parser_state state;
+    inline auto finished() const -> bool;
 
 private:
+    bool finished_;
     string source_;
     module* module_;
     vector<char*> lines_;

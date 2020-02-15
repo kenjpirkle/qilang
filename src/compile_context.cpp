@@ -15,26 +15,23 @@ compile_context::compile_context(const f_string<23>& initial_file_path) {
 }
 
 auto compile_context::add(const f_string<23>& file_path) -> void {
-    do {
-        if (try_lock()) {
-            if (modules_.find(file_path) != modules_.end()) {
-                if (threads_.size() < thread::hardware_concurrency() - 1) {
-                    auto mod = modules_.emplace(file_path, module_alloc_.emplace_back(module())).first->second;
-                    auto& parser = parsers_.emplace_back(this);
-                    auto& thr = threads_.emplace_back(
-                        std::thread([&]() { parser.process({ file_path, mod }); })
-                    );
-                    unlock();
-                    thr.detach();
-                    return;
-                } else {
-                    file_queue_.push(file_path);
-                    unlock();
-                    return;
-                }
-            }
+    mutex_.lock();
+    if (modules_.find(file_path) != modules_.end()) {
+        if (threads_.size() < thread::hardware_concurrency() - 1) {
+            auto mod = modules_.emplace(file_path, module_alloc_.emplace_back(module())).first->second;
+            auto& parser = parsers_.emplace_back(this);
+            auto& thr = threads_.emplace_back(
+                std::thread([&]() { parser.process({ file_path, mod }); })
+            );
+            mutex_.unlock();
+            thr.detach();
+            return;
+        } else {
+            file_queue_.push(file_path);
+            mutex_.unlock();
+            return;
         }
-    } while (true);
+    }
 }
 
 auto compile_context::pop() -> file_module {
@@ -47,19 +44,17 @@ auto compile_context::pop() -> file_module {
 }
 
 auto compile_context::cancel() -> void {
+    mutex_.lock();
+    cancelled_ = true;
+    mutex_.unlock();
+    
     for (auto& thr : threads_) {
         thr.join();
     }
 }
 
 auto compile_context::cancelled() const -> bool {
-    return any_of(
-        parsers_.begin(),
-        parsers_.end(),
-        [](const auto& p) {
-            return p.state == parser_state::cancelled;
-        }
-    );
+    return cancelled_;
 }
 
 auto compile_context::finished() const -> bool {
@@ -80,8 +75,8 @@ auto compile_context::contains(const f_string<23>& file_path) const -> bool {
     return modules_.find(file_path) != modules_.end();
 }
 
-auto compile_context::try_lock() -> bool {
-    return mutex_.try_lock();
+inline auto compile_context::lock() -> void {
+    mutex_.lock();
 }
 
 auto compile_context::unlock() -> void {

@@ -27,13 +27,14 @@ public:
     auto finished() const -> bool;
     auto empty() const -> bool;
     auto contains(const f_string<23>&) const -> bool;
-    auto try_lock() -> bool;
-    auto unlock() -> void;
+    inline auto lock() -> void;
+    inline auto unlock() -> void;
 
 private:
     mutex mutex_;
     vector<thread> threads_;
     vector<parser> parsers_;
+    bool cancelled_;
     queue<f_string<23>> file_queue_;
     mono_allocator<module, 16> module_alloc_;
     unordered_map<f_string<23>, module*, f_string_hasher<23>> modules_;

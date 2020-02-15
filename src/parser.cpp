@@ -11,27 +11,28 @@ auto parser::process(file_module file_mod) -> void {
     watch_for_modules();
 }
 
+inline auto parser::finished() const -> bool {
+    return finished_;
+}
+
 auto parser::watch_for_modules() -> void {
     file_module file_mod;
-    do {
-        if (context_->try_lock()) {
-            if (!context_->empty()) {
-                file_mod = context_->pop();
-                state = parser_state::working;
-                context_->unlock();
-                read_file(file_mod.file_path);
-                // parse file
+    context_->lock();
+    if (!context_->empty()) {
+        file_mod = context_->pop();
+        finished_ = false;
+        context_->unlock();
+        read_file(file_mod.file_path);
+        // parse file
 
-            } else {
-                state = parser_state::finished;
-                if (context_->cancelled() || context_->finished()) {
-                    context_->unlock();
-                    return;
-                }
-                context_->unlock();
-            }
+    } else {
+        finished_ = true;
+        if (context_->cancelled() || context_->finished()) {
+            context_->unlock();
+            return;
         }
-    } while (true);
+        context_->unlock();
+    }
 }
 
 auto parser::read_file(f_string<23>& file_path) -> void {
