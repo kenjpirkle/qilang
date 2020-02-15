@@ -79,6 +79,6 @@ inline auto compile_context::lock() -> void {
     mutex_.lock();
 }
 
-auto compile_context::unlock() -> void {
+inline auto compile_context::unlock() -> void {
     mutex_.unlock();
 }
