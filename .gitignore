@@ -36,3 +36,4 @@ tests/bin/debug/*
 tests/bin/release/*
 .vscode/launch.json
 .vscode/settings.json
+operator_precedence
