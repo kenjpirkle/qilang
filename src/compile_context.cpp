@@ -45,11 +45,14 @@ auto compile_context::pop() -> file_module {
 
 auto compile_context::cancel() -> void {
     mutex_.lock();
-    cancelled_ = true;
-    mutex_.unlock();
-    
-    for (auto& thr : threads_) {
-        thr.join();
+    if (!cancelled_) {
+        cancelled_ = true;
+        mutex_.unlock();
+        for (auto& thr : threads_) {
+            thr.join();
+        }
+    } else {
+        mutex_.unlock();
     }
 }
 
