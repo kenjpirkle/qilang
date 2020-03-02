@@ -17,22 +17,25 @@ auto parser::finished() const -> bool {
 
 auto parser::watch_for_modules() -> void {
     file_module file_mod;
-    context_->lock();
-    if (!context_->empty()) {
-        file_mod = context_->pop();
-        finished_ = false;
-        context_->unlock();
-        read_file(file_mod.file_path);
-        // parse file
 
-    } else {
-        finished_ = true;
-        if (context_->cancelled() || context_->finished()) {
+    do {
+        context_->lock();
+        if (!context_->cancelled()) {
+            if (!context_->empty()) {
+                file_mod = context_->pop();
+                finished_ = false;
+                context_->unlock();
+                module_ = file_mod.module_ref;
+                read_file(file_mod.file_path);
+            } else if (context_->finished()) {
+                context_->unlock();
+                break;
+            }
+        } else {
             context_->unlock();
-            return;
+            break;
         }
-        context_->unlock();
-    }
+    } while (true);
 }
 
 auto parser::read_file(f_string<23>& file_path) -> void {
@@ -47,7 +50,8 @@ auto parser::read_file(f_string<23>& file_path) -> void {
         source_.back() = '\0';
         in.close();
     } else {
-        throw(errno);
+        cout << "file: " << file_path << " could not be opened or does not exist\n";
+        context_->cancel();
     }
 }
 
