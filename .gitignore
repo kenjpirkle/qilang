@@ -37,3 +37,4 @@ tests/bin/release/*
 .vscode/launch.json
 .vscode/settings.json
 notes
+test.qi
