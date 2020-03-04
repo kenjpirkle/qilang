@@ -34,7 +34,10 @@ bin/debug/qi
 bin/release/qi
 tests/bin/debug/*
 tests/bin/release/*
+
+# Misc
 .vscode/launch.json
 .vscode/settings.json
+includes/backup
 notes
 test.qi
