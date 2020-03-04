@@ -3,11 +3,14 @@
 #include <fstream>
 #include <iostream>
 
+// TODO: parser needs a mutex to prevent data races on the finished call
+
 parser::parser(compile_context* context) : context_(context) {}
 
 auto parser::process(file_module file_mod) -> void {
     read_file(file_mod.file_path);
     lex_parse();
+    finished_ = true;
     watch_for_modules();
 }
 
@@ -27,9 +30,12 @@ auto parser::watch_for_modules() -> void {
                 context_->unlock();
                 module_ = file_mod.module_ref;
                 read_file(file_mod.file_path);
+                finished_ = true;
             } else if (context_->finished()) {
                 context_->unlock();
                 break;
+            } else {
+                context_->unlock();
             }
         } else {
             context_->unlock();
